@@ -1,0 +1,327 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>自动化测试报告廖---2</title>
+    <!-- #引入element+Vue -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="http://unpkg.com/vue/dist/vue.js"></script>
+    <script src="http://unpkg.com/element-ui@2.11.0/lib/index.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script> 
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+    <style>
+        #app{
+            margin: 0 10%;
+            margin: 0 10%;
+        }
+       ._title{
+        width:100%;
+        font-size:30px;
+        font-weight:bold;
+        color:rgba(51,51,51,1);
+        line-height:30px;
+        text-align: center;
+       }
+       #_div-top-bar{
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;    
+            margin: 10px 0;
+       }
+       #_div-top-bar  .top-bar{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            border:1px solid rgba(217,217,217,1);
+            margin: 10px 10px;
+            height: 95px;
+            border-radius: 8px;
+       }
+       #_div-top-bar  .top-bar .top-bar-span{
+                font-weight:bold;
+                color:rgba(102,102,102,1);
+       }
+       .span1{
+            font-size:28px;
+       }
+       .span2{
+            font-size:14px;
+       }
+       ._right {
+            display: block;
+            float: right;
+        }
+    button.link {
+        font-size: 1em;
+        text-align: left;
+        color: blue;
+        background: none;
+        margin-top: 5px;
+        padding: 0;
+        border: none;
+        cursor: pointer;
+        outline:none;
+        text-align: center;
+        width:100%;
+        font-weight:400;
+        color:rgba(67,152,138,1);
+        line-height:20px;
+    }
+    .detail{
+        width: 40%;
+        margin-left: 33%;
+        margin-top:1%;
+        text-align: left;
+        line-height: 27px;
+    }
+    .el-table__expand-icon>.el-icon{
+        display: none;
+    }
+    .span-form{
+        font-size:16px;
+        font-weight:400;
+        color:rgba(102,102,102,1);
+        line-height:21px;
+    }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1 class="_title" >自动化测试报告</h1>
+        <div> 
+            <button  class="link" @click='showToggle'><span>报告详情</span></button>
+                <div class="detail" v-show='isShow' v-html='reportDetail.dict_info'></div> 
+        </div>
+        <div  id="_div-top-bar">
+            <div v-for='item in topList' class="top-bar" >
+                <span class="top-bar-span span1" :style="{color:(item.key1=='错误'||item.key1=='失败')?'rgba(229,82,82,1)':item.key1=='通过'?'rgba(67,152,138,1)':''}" >
+                    {{item.key2}}</span>
+                <span class="top-bar-span span2" :style="{color:(item.key1=='错误'||item.key1=='失败')?'rgba(229,82,82,1)':item.key1=='通过'?'rgba(67,152,138,1)':''}">
+                    {{item.key1}}</span>
+
+            </div>
+        </div>
+       <el-row>
+           <el-form label-width="150px"  :inline="true" :model='formData'>
+               <el-form-item>
+                   <span class="span-form">测试集：test2</span>
+               </el-form-item>
+               <div class="_right">
+                    <el-form-item>
+                        <el-button    @click='expandAll'>{{!isExpandAll?"展开全部":"收起全部"}}</el-button>
+                    </el-form-item>
+                    <el-form-item>
+                        <!-- fix   v-model="formData.id" -->
+                        <el-select  placeholder="请选择作者" clearable
+                            @clear='getAllExecutor'
+                            @change='selectExecutor'
+                            v-model="formData.executor">
+                            <el-option
+                                v-for="item in executorList"
+                                :key="item.id"
+                                :label="item.executor"
+                                :value="item.executor">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button-group>
+                            <el-button @click='getAllResult'>全部</el-button>
+                            <el-button @click='getFail'>失败</el-button>
+                            <el-button @click='getError'>错误</el-button>
+                        </el-button-group>
+                    </el-form-item>
+               </div> 
+           </el-form>
+       </el-row>
+       <div>
+            <el-table ref="multipleTable" :data="tabelData" style="width: 100%;" 
+                :header-cell-style="{background:'#eef1f6',color:'rgba(102,102,102,1)',fontSize:'15px'}"
+                :cell-style="cellStyle"
+                @cell-click="cellClick"
+                id="table"
+                :row-key="getRowKeys" :expand-row-keys="expands">
+                <el-table-column type="expand">
+                    <template slot-scope="props">
+                        <el-form >
+                            <el-form-item label='测试详细信息：' v-html="props.row.steps"><span>{{props.row.steps}}</span></el-form-item>
+                        </el-form>
+                    </template>
+                </el-table-column>
+                <el-table-column  label="用例名称"  width='800' prop="title"  > </el-table-column>
+                <el-table-column  label="结果" prop="result">
+                    <template scope="scope">
+                        <span v-if="scope.row.result=='Error'||scope.row.result=='Fail'" style="color:rgba(229,82,82,1)">{{ scope.row.result}}</span>
+                        <span v-else style="color: rgb(67, 152, 138)">{{ scope.row.result}}</span>
+                    </template> 
+                </el-table-column>
+                <el-table-column  label="作者" prop="executor"></el-table-column>
+       </el-table>
+       </div>
+
+    </div>
+
+    <script>
+        var app = new Vue({
+        el: '#app',
+        data: {
+            isExpandAll:false,
+            isShow:false,
+            expands: [],
+            reportDetail:{},
+            formData:{
+                executor:'',
+                id:'',
+                result:'',
+            },
+            tabelData:[],
+            executorList:[],
+            topList:[],
+
+
+        },
+
+        mounted() { 
+            this.init();
+        },
+
+        methods: {
+            init(){
+                //调接口,给表格的内容赋值
+                var myTable=[{'id': 1, 'run_time': '2019-08-23 10:06:47', 'executor': 'Qu Chao', 'reason': '执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n<br>', 'result': 'Error', 'title': '1112222', 'steps': '用例执行时间：2019-08-23 10:06:47 <br>描述：<pre>执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n&lt;br&gt; <br></pre><span style=\'color:red\'>步骤1失败, 原因: <pre>执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n</pre> </span><br>\n                                <div class="step">\n                                    <div class="card-header card-header-flat" id="heading_0_1">\n                                        <h6 class="mb-0">\n                                            <a class="btn-link-primary btn-block text-left"\n                                            data-toggle="collapse" data-target="#collapse_0_1"\n                                            aria-expanded="false" aria-controls="collapse_0_1" title="点击展开">\n                                                步骤1: 无标题步骤\n                                            </a>\n                                        </h6>\n                                    </div>\n                                    <div id="collapse_0_1" class="collapse" aria-labelledby="heading_0_1">\n                                        <div class="card-body">\n                                            <span style=\'color:red\'>失败原因: <br> &emsp;&emsp;执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n </span><br><br><br>&emsp;&emsp;详细用例: <br> &emsp;&emsp;{\'status_code\': {\'=\': 200}, \'ResponseStatusListObject\': {\'type\': \'dict\'}, \'ResponseStatusObject\': {\'type\': \'list\'}, \'StatusCode\': {\'=\': \'1\'}, \'StatusString\': {\'in\': [\'TabID已存在,不允许重复\', \'TabName已存在,不允许重复\', \'TabID不能为空\', \'TabName不能为空\', \'TabType不能为空\']}} <br>\n                                        </div>\n                                    </div>\n                                </div>\n            <br>'},{'id': 2, 'run_time': '2019-08-23 10:06:47', 'executor': 'Qu Chao', 'reason': '执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n<br>', 'result': 'Pass', 'title': '1112222', 'steps': '用例执行时间：2019-08-23 10:06:47 <br>描述：<pre>执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n&lt;br&gt; <br></pre><span style=\'color:red\'>步骤1失败, 原因: <pre>执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n</pre> </span><br>\n                                <div class="step">\n                                    <div class="card-header card-header-flat" id="heading_0_1">\n                                        <h6 class="mb-0">\n                                            <a class="btn-link-primary btn-block text-left"\n                                            data-toggle="collapse" data-target="#collapse_0_1"\n                                            aria-expanded="false" aria-controls="collapse_0_1" title="点击展开">\n                                                步骤1: 无标题步骤\n                                            </a>\n                                        </h6>\n                                    </div>\n                                    <div id="collapse_0_1" class="collapse" aria-labelledby="heading_0_1">\n                                        <div class="card-body">\n                                            <span style=\'color:red\'>失败原因: <br> &emsp;&emsp;执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n </span><br><br><br>&emsp;&emsp;详细用例: <br> &emsp;&emsp;{\'status_code\': {\'=\': 200}, \'ResponseStatusListObject\': {\'type\': \'dict\'}, \'ResponseStatusObject\': {\'type\': \'list\'}, \'StatusCode\': {\'=\': \'1\'}, \'StatusString\': {\'in\': [\'TabID已存在,不允许重复\', \'TabName已存在,不允许重复\', \'TabID不能为空\', \'TabName不能为空\', \'TabType不能为空\']}} <br>\n                                        </div>\n                                    </div>\n                                </div>\n            <br>'}, {'id': 3, 'run_time': '2019-08-23 10:06:47', 'executor': 'Qu Chao', 'reason': '执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n<br>', 'result': 'Fail', 'title': '1112222', 'steps': '用例执行时间：2019-08-23 10:06:47 <br>描述：<pre>执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n&lt;br&gt; <br></pre><span style=\'color:red\'>步骤1失败, 原因: <pre>执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n</pre> </span><br>\n                                <div class="step">\n                                    <div class="card-header card-header-flat" id="heading_0_1">\n                                        <h6 class="mb-0">\n                                            <a class="btn-link-primary btn-block text-left"\n                                            data-toggle="collapse" data-target="#collapse_0_1"\n                                            aria-expanded="false" aria-controls="collapse_0_1" title="点击展开">\n                                                步骤1: 无标题步骤\n                                            </a>\n                                        </h6>\n                                    </div>\n                                    <div id="collapse_0_1" class="collapse" aria-labelledby="heading_0_1">\n                                        <div class="card-body">\n                                            <span style=\'color:red\'>失败原因: <br> &emsp;&emsp;执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1222, in run_case_entity\n    self.temper["key"]["1"] = self.temper["key"]["return"]\nKeyError: \'return\'\n </span><br><br><br>&emsp;&emsp;详细用例: <br> &emsp;&emsp;{\'status_code\': {\'=\': 200}, \'ResponseStatusListObject\': {\'type\': \'dict\'}, \'ResponseStatusObject\': {\'type\': \'list\'}, \'StatusCode\': {\'=\': \'1\'}, \'StatusString\': {\'in\': [\'TabID已存在,不允许重复\', \'TabName已存在,不允许重复\', \'TabID不能为空\', \'TabName不能为空\', \'TabType不能为空\']}} <br>\n                                        </div>\n                                    </div>\n                                </div>\n            <br>'},{'id': 4, 'run_time': '2019-08-23 10:06:47', 'executor': 'Guan Benxue', 'reason': '执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1221, in run_case_entity\n    self.exec_single_case()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 995, in exec_http_step\n    cert_ori = os.path.join(upload_path, "ca.pem") if "ca.pem" in os.listdir(upload_path) else False\nFileNotFoundError: [Errno 2] No such file or directory: \'/mnt/hgfs/work/gitproj/backend-api/material/upload\'\n<br>', 'result': 'Error', 'title': 'c1_ok_正确camera_idx', 'steps': '用例执行时间：2019-08-23 10:06:47 <br>描述：<pre>执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1221, in run_case_entity\n    self.exec_single_case()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 995, in exec_http_step\n    cert_ori = os.path.join(upload_path, "ca.pem") if "ca.pem" in os.listdir(upload_path) else False\nFileNotFoundError: [Errno 2] No such file or directory: \'/mnt/hgfs/work/gitproj/backend-api/material/upload\'\n&lt;br&gt; <br></pre><span style=\'color:red\'>步骤1失败, 原因: <pre>执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1221, in run_case_entity\n    self.exec_single_case()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 995, in exec_http_step\n    cert_ori = os.path.join(upload_path, "ca.pem") if "ca.pem" in os.listdir(upload_path) else False\nFileNotFoundError: [Errno 2] No such file or directory: \'/mnt/hgfs/work/gitproj/backend-api/material/upload\'\n</pre> </span><br>\n                                <div class="step">\n                                    <div class="card-header card-header-flat" id="heading_1_1">\n                                        <h6 class="mb-0">\n                                            <a class="btn-link-primary btn-block text-left"\n                                            data-toggle="collapse" data-target="#collapse_1_1"\n                                            aria-expanded="false" aria-controls="collapse_1_1" title="点击展开">\n                                                步骤1: 无标题步骤\n                                            </a>\n                                        </h6>\n                                    </div>\n                                    <div id="collapse_1_1" class="collapse" aria-labelledby="heading_1_1">\n                                        <div class="card-body">\n                                            <span style=\'color:red\'>失败原因: <br> &emsp;&emsp;执行异常：Traceback (most recent call last):\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1221, in run_case_entity\n    self.exec_single_case()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/executor/function.py", line 995, in exec_http_step\n    cert_ori = os.path.join(upload_path, "ca.pem") if "ca.pem" in os.listdir(upload_path) else False\nFileNotFoundError: [Errno 2] No such file or directory: \'/mnt/hgfs/work/gitproj/backend-api/material/upload\'\n </span><br><br><br>&emsp;&emsp;详细用例: <br> &emsp;&emsp;{\'title\': \'正确camera_idx\', \'method\': \'post\', \'url\': \'http://:10607\', \'rest\': \'/whale-profile/wpi-partner/allTracks\', \'headers\': {\'Content-Type\': \'application/json\'}, \'body\': {\'cameras\': [{\'camera_idx\': \'Traceback (most recent call last):\\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/auto_common/util.py", line 187, in jinja_instead\\n    val = tpl.render(args)\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/asyncsupport.py", line 76, in render\\n    return original_render(self, *args, **kwargs)\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/environment.py", line 1008, in render\\n    return self.environment.handle_exception(exc_info, True)\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/environment.py", line 780, in handle_exception\\n    reraise(exc_type, exc_value, tb)\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/_compat.py", line 37, in reraise\\n    raise value.with_traceback(tb)\\n  File "&lt;template&gt;", line 1, in top-level template code\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/environment.py", line 430, in getattr\\n    return getattr(obj, attribute)\\njinja2.exceptions.UndefinedError: list object has no element 0\\n\', \'region_id\': \'Traceback (most recent call last):\\n  File "/mnt/hgfs/work/gitproj/backend-api/integration/auto_executor/auto_common/util.py", line 187, in jinja_instead\\n    val = tpl.render(args)\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/asyncsupport.py", line 76, in render\\n    return original_render(self, *args, **kwargs)\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/environment.py", line 1008, in render\\n    return self.environment.handle_exception(exc_info, True)\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/environment.py", line 780, in handle_exception\\n    reraise(exc_type, exc_value, tb)\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/_compat.py", line 37, in reraise\\n    raise value.with_traceback(tb)\\n  File "&lt;template&gt;", line 1, in top-level template code\\n  File "/home/ubuntu/Desktop/env_proj/venv_py3/lib/python3.6/site-packages/jinja2/environment.py", line 430, in getattr\\n    return getattr(obj, attribute)\\njinja2.exceptions.UndefinedError: list object has no element 0\\n\'}], \'endTime\': 1566612412017, \'startTime\': 1566439612018, \'profileId\': 1, \'partnerProfileId\': 1, \'cached\': True, \'place\': 1}} <br>\n                                        </div>\n                                    </div>\n                                </div>\n            <br>'}];
+                this.topList=[{
+                        'key1':'通过率',
+                        'key2':'0.00%'
+                    },
+                    {  
+                        'key1':'总数',
+                        'key2':'0' 
+                    },
+                    {
+                        'key1':'通过',
+                        'key2':'0' 
+                    },
+                    {
+                        'key1':'失败',
+                        'key2':'0' 
+                    },
+                    {
+                        'key1':'错误',
+                        'key2':'2' 
+                    },]
+                this.tabelData=myTable;
+                this.reportDetail={'dict_info': "<span style='font-weight:600'>开始时间：</span>2019-08-23 10:06:46 <br> <span style='font-weight:600'>持续时长：</span>6 seconds <br> <span style='font-weight:600'>结束时间：</span>2019-08-23 10:06:52 <br> <span style='font-weight:600'>配置名称：</span>阿道夫 <br> <span style='font-weight:600'>默认配置参数信息：</span></br>{'七千万': '700000000', 'set_id': 1561, 'pre_name': None, 'repo_name': 'sats'} <br> <span style='font-weight:600'>自定义配置参数信息：</span></br>{} <br> "};
+                let hash = {};
+                //遍历一个对象数组，并根据某个条件筛选
+                this.executorList= myTable.reduce(function(arr, current) {
+                    hash[current.executor] ? '' : hash[current.executor] = true && arr.push(current);
+                    return arr
+                }, []);
+
+
+
+
+            },
+            showToggle(){
+                this.isShow=!this.isShow;
+                return ;
+            },
+            getRowKeys(row) {
+                    return row.id;
+            },
+            // 点击行任意位置展开
+            cellClick(row, column, event) {
+                if(event.cellIndex!=0){
+                    this.$refs.multipleTable.toggleRowExpansion(row)
+                }   
+            },
+            expandAll(){ 
+                if(this.isExpandAll){//收起
+                    this.expands = [];
+                }else{//展开全部
+                    for(let i=0;i<this.tabelData.length;i++){
+                        this.expands.push(this.tabelData[i].id);
+                    }  
+                }
+                this.isExpandAll = !this.isExpandAll;
+            },
+            // 单元格样式回调
+            cellStyle({row, column, rowIndex, columnIndex}){
+                switch (columnIndex) {
+                    case 1:
+                        return 'font-weight:400;color:rgba(67,152,138,1);line-height:20px;font-size:15px';
+                    case 2:
+                        return 'font-weight:400;color:rgba(229,82,82,1);line-height:20px;font-size:15px';
+                    case 3:
+                        return 'font-weight:400;color:rgba(102,102,102,1);line-height:20px;font-size:15px';
+                    default:
+                        return;
+                }
+            },
+            // 筛选
+            selectExecutor(val){
+                 let arr=[];
+                 this.init();
+                for(let i=0;i<this.tabelData.length;i++){
+                    if(val===this.tabelData[i].executor){
+                        arr.push(this.tabelData[i]);
+                    }
+                }  
+                this.tabelData=arr;
+                // fix
+                this.expands = [];
+                this.isExpandAll=false;
+            },
+            getAllExecutor(){
+                this.init();
+            },
+            getAllResult(){
+                this.formData.executor='';
+                this.init();
+                // fix
+                this.expands = [];
+                this.isExpandAll=false;
+
+            },
+            getFail(){
+                this.init();
+                let arr=[];
+                for(let i=0;i<this.tabelData.length;i++){
+                    if(this.tabelData[i].result==='Fail'){
+                        arr.push(this.tabelData[i])
+                    }
+                }
+                this.tabelData=arr;
+                // fix,加了两行
+                this.expands = [];
+                this.isExpandAll=false;
+            },  
+            getError(){
+                this.init();
+                let arr=[];
+                for(let i=0;i<this.tabelData.length;i++){
+                    if(this.tabelData[i].result==='Error'){
+                        arr.push(this.tabelData[i])
+                    }
+                }
+                this.tabelData=arr;
+                // fix,加了两行
+                this.expands = [];
+                this.isExpandAll=false;
+            },
+        }
+        })
+
+    </script>
+</body>
+</html>

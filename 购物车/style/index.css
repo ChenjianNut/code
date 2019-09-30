@@ -1,0 +1,11 @@
+#app{
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+}
+.but-buy{
+    width: 100%;
+}
+.el-input{
+    margin-top: 10px;
+}

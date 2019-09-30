@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>income</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <script src="http://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+        h2{
+            text-align: center;
+        }
+        .el-card{
+            width: 60%;
+        }
+        .button-group{
+           float: right;
+        }
+        .el-card {
+            width: 100%;
+        }
+      
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-row>
+            <el-col :span='10' >
+                <el-card  >
+                    <h2>title</h2>
+                    <el-form ref="form" :model="form" label-width="60px" >
+                        <el-form-item  label='a'  prop="a"
+                            :rules="{validator: checkNum, required: true, trigger: 'change'}">
+                            <el-input placeholder='测试' v-model.trim='form.a'></el-input>
+                        </el-form-item>
+                        <el-form-item label='b' prop='b' :rules="{validator: checkNum, required: true, trigger: 'change'}">
+                            <el-input  placeholder='测试' v-model='form.b'></el-input>
+                        </el-form-item>
+                        <el-form-item label='c' prop='c' :rules="{validator: checkNum, required: true, trigger: 'change'}">
+                            <el-input  placeholder='测试' v-model='form.c'></el-input>
+                        </el-form-item>
+                        <el-form-item  label='d' prop='d' :rules="{validator: checkNum, required: true, trigger: 'change'}">
+                            <el-input placeholder='测试' v-model='form.d'></el-input>
+                        </el-form-item>
+                        <el-form-item  label='e' prop='e' :rules="{validator: checkNum, required: true, trigger: 'change'}">
+                            <el-input  placeholder='测试' v-model='form.e'></el-input>
+                        </el-form-item>
+                        <el-form-item label='日期'>
+                            <el-date-picker v-model="valuedate" type="daterange" unlink-panels range-separator="至"
+                                start-placeholder='开始日期' end-placeholder='结束日期'  format="yyyy 年 MM 月 dd 日" 
+                                value-format="yyyy-MM-dd" style="width: 100%" :default-value="timeDefaultShow">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button-group class="button-group">
+                                <el-button type='primary' @click="close">close</el-button>
+                                <el-button  type='primary' @click='getExpende'> get</el-button>
+                            </el-button-group>
+                        </el-form-item>
+                    </el-form>
+                </el-card>
+            </el-col>
+            <el-col :span="10" :offset="2">
+            <el-card v-if="outCome" >
+                    <h2>outCome</h2>
+                <el-form label-width="60px">
+                    <el-form-item  label='expense' >
+                        <el-input placeholder='测试' v-model='expense' :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item  label='平均值' >
+                        <el-input placeholder='平均值' v-model='average' :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item  label='天数' >
+                        <el-input placeholder='天数' v-model='dateNum' :disabled="true"></el-input>
+                    </el-form-item>
+                </el-form>
+            </el-card>
+            </el-col>
+        </el-row>
+        
+        
+       
+        
+    </div>
+    <script>
+        var vm=new Vue({
+            el:'#app',
+            data() {
+                return {
+                    form:{
+                        a:'',
+                        b:'',
+                        c:'',
+                        d:'',
+                        e:'',
+                    },
+                   
+                    expense:'',
+                    average:'',
+                    outCome:false,
+                    valuedate:"",
+                    dateNum:'',
+                    radio:'',
+                    timeDefaultShow:"",
+                    checkNum:(rule, value, callback)=>{
+                        if(!((/^(-?\d+)(\.\d+)?$/.test(value)))){
+                            callback(new Error("输入正确的数字！"));
+                        }else {
+                            callback();
+                        }
+                    }
+
+                }
+            },
+            mounted() {
+                this.timeDefaultShow=new Date();
+                this.timeDefaultShow.setMonth(new Date().getMonth() - 1);            
+                },
+            methods: {
+                getExpende(){
+                    this.outCome=true;
+                    var num=Number(this.form.a)+Number(this.form.b)+Number(this.form.c)+Number(this.form.d)+Number(this.form.e);
+                    this.expense=num;
+                    this.getDateNum();
+                    this.average=this.expense/this.dateNum;
+                },
+                close(){
+                    this.form={
+                        a:'',
+                        b:'',
+                        c:'',
+                        d:'',
+                        e:'',
+                    };
+                    this.expense='';
+                    this.valuedate='';
+                    this.outCome=false;
+                },
+                getDateNum(){//计算两个日期之间的天数
+                    if(this.valuedate.length>0){
+                        var date1= this.valuedate[0].split('-');
+                        var date2=this.valuedate[1].split('-');
+                        var  num1= [31,29,31,30,31,30,31,31,30,31,30,31];
+                        var  num2= [31,28,31,30,31,30,31,31,30,31,30,31];
+                        var year1=Number(date1[0]);
+                        var month1=Number(date1[1]);
+                        var time1=Number(date1[2]);
+
+                        var year2=Number(date2[0]);
+                        var month2=Number(date2[1]);
+                        var time2=Number(date2[2]);
+                        if(year1===year2){//两个日期同一年
+                            if(month1===month2) {
+                                this.dateNum= time2-time1;
+                            }
+                            if(month2-month1===1){
+                                this.dateNum= num1[month1-1]-time1+time2;
+                            }
+                            if(month2-month1>1){
+                                var sum=num1[month1-1]-time1+time2;
+                                for(var i=month1+1;i<month2;i++){
+                                    sum+=num1[i-1]
+                                }
+                                this.dateNum= sum;
+                            
+                            }
+                        }else{
+                            alert('暂不支持不同年份的计算！');
+                        }
+                    }
+                    
+                },
+                handleClick(){
+
+                }
+            },
+        })
+    </script>
+    
+</body>
+</html>

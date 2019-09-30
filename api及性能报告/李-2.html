@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>李---2</title>
+    <!-- #引入element+Vue -->
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    <script src="http://unpkg.com/vue/dist/vue.js"></script>
+    <!-- <script src="http://unpkg.com/element-ui@2.11.0/lib/index.js"></script> -->
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+
+    <style>
+        #app {
+            margin: 0 10%;
+          
+        }
+
+        ._title {
+            width: 100%;
+            font-size: 23px;
+            font-weight: bold;
+            color: rgba(51, 51, 51, 1);
+            line-height: 30px;
+            text-align: center;
+        }
+
+        #_div-top-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        #_div-top-bar .top-bar {
+            display: flex;
+            /* 将里面的项目一行一行的显示 */
+            flex-direction: column;
+            /* 在弹性盒对象的 <div> 元素中的各项周围留有空白，div里面的项目位于容器中心 */
+            justify-content: center;
+            /* 居中对齐弹性盒的各项 ,这里可以是div里面的文字居中显示 */
+            align-items: center;
+            flex: 1;
+            border: 1px solid rgba(217, 217, 217, 1);
+            /* 设置div的margin */
+            margin: 10px 20px;
+            height: 95px;
+            border-radius: 8px;
+        }
+
+        #_div-top-bar .top-bar .top-bar-span {
+            font-weight: bold;
+            color: rgba(102, 102, 102, 1);
+        }
+
+        .span1 {
+            font-size: 28px;
+        }
+
+        .span2 {
+            font-size: 14px;
+        }
+
+        ._right {
+            display: block;
+            float: right;
+        }
+
+        /* button.link {
+            font-size: 1em;
+            background: none;
+            margin: 0;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            text-align: center;
+            width: 100%;
+            font-weight: 400;
+            color: rgba(67, 152, 138, 1);
+            line-height: 20px;
+        } */
+        button.link{
+            font-size: 1em;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            /* 少了宽度无法居中 */
+            width: 100%;
+            color: rgba(67, 152, 138, 1);
+            line-height: 20px;
+        }
+
+        
+        .detail {
+            width: 60%;
+            font-size: 16px;
+            margin: 10px 20%;
+            text-align: left;
+            line-height: 27px;
+            font-family: PingFangSC;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            /* white-space: -moz-pre-wrap;  */
+            /* white-space: -pre-wrap;  */
+            /* white-space: -o-pre-wrap;  */
+            word-wrap: break-word;
+        }
+
+        .el-table__expand-icon>.el-icon {
+            display: none;
+        }
+
+        .span-form {
+            font-size: 16px;
+            font-weight: 400;
+            color: rgba(102, 102, 102, 1);
+            line-height: 21px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1 class="_title">自动化测试报告</h1>
+        <div>
+            <!-- <button class="link" @click='showToggle'><span>报告详情</span></button> -->
+            <el-button type='text' class="link" @click='showToggle' >报告详情</el-button>
+
+            <div class="detail" v-show='isShow'>
+                <pre>{{reportDetail}}<pre></div> 
+                    <!-- <div class="detail" v-show='isShow' v-html='reportDetail'></div> -->
+        </div>
+        <div  id="_div-top-bar">
+            <div v-for='item in topList' class="top-bar" >
+                <span class="top-bar-span span1" :style="{color:(item.key1=='错误'||item.key1=='失败')?'rgba(229,82,82,1)':item.key1=='通过'?'rgba(67,152,138,1)':''}" >
+                    {{item.key2}}</span>
+                <span class="top-bar-span span2" :style="{color:(item.key1=='错误'||item.key1=='失败')?'rgba(229,82,82,1)':item.key1=='通过'?'rgba(67,152,138,1)':''}">
+                    {{item.key1}}</span>
+
+            </div>
+        </div>
+       <el-row>
+           <el-form label-width="150px"  :inline="true" :model='formData'>
+               <el-form-item>
+                   <span class="span-form">测试集：test2</span>
+               </el-form-item>
+               <div class="_right">
+                    <el-form-item>
+                        <el-button    @click='expandAll'>{{!isExpandAll?"展开全部":"收起全部"}}</el-button>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-select  placeholder="请选择作者" clearable
+                            @clear='getAllExecutor'
+                            @change='selectExecutor'
+                            v-model="formData.executor">
+                            <el-option
+                                v-for="item in executorList"
+                                :key="item.id"
+                                :label="item.executor"
+                                :value="item.executor">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button-group>
+                            <el-button @click='getAllResult'>全部</el-button>
+                            <el-button @click='getFail'>失败</el-button>
+                        </el-button-group>
+                    </el-form-item>
+               </div> 
+           </el-form>
+       </el-row>
+       <div>
+            <el-table ref="multipleTable" :data="tableData" style="width: 100%;" 
+                :header-cell-style="{background:'#eef1f6',color:'rgba(102,102,102,1)'}"
+                :cell-style="cellStyle"
+                @cell-click="cellClick"
+                id="table"
+                :row-key="getRowKeys" :expand-row-keys="expands">
+                <el-table-column type="expand">
+                    <template slot-scope="props">
+                        <el-form >
+                            <el-form-item label='测试任务：'><span>{{props.row.title}}</span></el-form-item>
+                            <el-form-item label='测试策略：'><span>{{props.row.strange}}</span></el-form-item>
+                            <el-form-item label='测试设置：'><span>{{props.row.setup}}</span></el-form-item>
+                            <el-form-item label='测试发送的json文件：'><span>{{props.row.json_path}}</span></el-form-item>
+                            <el-form-item label='测试结果：'></br><pre >{{props.row.test_result}}</pre>
+                </el-form-item>
+                <el-form-item label='测试详细报告连接：'><a :href="props.row.link" target="_blank">{{props.row.link}}</a>
+                </el-form-item>
+                </el-form>
+                </template>
+                </el-table-column>
+                <el-table-column label="测试项目" prop="title"> </el-table-column>
+                
+                <el-table-column label="结果" width='100' prop="result_name">
+                   
+                    <template scope="scope">
+                        <span v-if="scope.row.result=='Error'||scope.row.result=='Fail'"
+                            style="color:rgba(229,82,82,1)">{{ scope.row.result_name}}</span>
+                        <span v-else style="color: rgb(67, 152, 138)">{{ scope.row.result_name}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column label="作者" width='200' prop="executor"></el-table-column>
+                </el-table>
+            </div>
+
+        </div>
+
+        <script>
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    isExpandAll: false,
+                    isShow: false,
+                    expands: [],
+                    reportDetail: '',
+                    formData: {
+                        executor: '',
+                        id: '',
+                        result: '',
+                    },
+                    tableData: [],
+                    selectTableData: [],
+                    executorList: [],
+                    topList: [],
+
+
+                },
+
+                mounted() {
+                    this.init();
+                },
+
+                methods: {
+                    init() {
+                        //调接口,给表格的内容赋值
+                        var myTable = [
+                            { 'id': 1, 'title': 'T1', 'result_name': 'Fail', 'result': 'Fail', 'executor': 'li', 'strange': "['T1:constantConcurrentUsers(10) during(10)']", 'dict_in': "{'host': '10.9.242.41:9000', 'set_up': 124414}", 'setup': '', 'json_path': '[]', 'link': 'http://10.9.242.41:9000/common/report/performance/TE2/1522_task_error_report.html', 'test_result': '11:46:55.560 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n11:46:55.660 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n11:46:55.771 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n11:46:55.871 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n11:46:55.971 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n11:46:56.071 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n11:46:56.171 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n11:46:56.271 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n11:46:56.371 ERROR i.g.h.a.HttpRequestAction - httpRequest-3 failed to execute: url {}/perf/perfTaskList cant be parsed into an Uri: j.l.IllegalArgumentException: {}/perf/perfTaskList could not be parsed into a proper Uri missing scheme\n' },
+                            { 'id': 2, 'title': 'T2', 'result_name': 'Fail', 'result': 'Fail', 'executor': 'li', 'strange': "['T2:constantUsersPerSec(1) during(5)']", 'dict_in': "{'key1': 21124, 'key2': 13413}", 'setup': '', 'json_path': '[]', 'link': 'http://10.9.242.41:9000/common/report/performance/TE2/t2-20190822034733884/index.html', 'test_result': '\n================================================================================\n---- Global Information --------------------------------------------------------\n> request count                                          5 (OK=5      KO=0     )\n> min response time                                     18 (OK=18     KO=-     )\n> max response time                                     37 (OK=37     KO=-     )\n> mean response time                                    23 (OK=23     KO=-     )\n> std deviation                                          7 (OK=7      KO=-     )\n> response time 50th percentile                         20 (OK=20     KO=-     )\n> response time 75th percentile                         22 (OK=22     KO=-     )\n> response time 95th percentile                         34 (OK=34     KO=-     )\n> response time 99th percentile                         36 (OK=36     KO=-     )\n> mean requests/sec                                  0.833 (OK=0.833  KO=-     )\n---- Response Time Distribution ------------------------------------------------\n> t < 800 ms                                             5 (100%)\n> 800 ms < t < 1200 ms                                   0 (  0%)\n> t > 1200 ms                                            0 (  0%)\n> failed                                                 0 (  0%)\n================================================================================\n\n' },
+                            { 'id': 3, 'title': 'T3', 'result_name': 'Pass', 'result': 'Pass', 'executor': 'chen', 'strange': '', 'dict_in': '', 'setup': '', 'json_path': '[]', 'link': '没有详细报告！', 'test_result': 'Creating summariser &lt;summary&gt;\n Created the tree successfully using /platform/backend-perf/report/performance/ALL_1/SET_TC_1/T3/test.jmx\n Starting the test @ Sat Aug 24 16:31:49 CST 2019 (1566635509539)\n Waiting for possible Shutdown/StopTestNow/HeapDump/ThreadDump message on port 4445\n summary =     10 in 00:00:01 =   10.3/s Avg:    29 Min:    17 Max:    73 Err:     0 (0.00%)\n Tidying up ...    @ Sat Aug 24 16:31:50 CST 2019 (1566635510923)\n ... end of run\n' }];
+                        this.topList = [{
+                            'key1': '通过率',
+                            'key2': '50.0%'
+                        },
+                        {
+                            'key1': '总数',
+                            'key2': '2'
+                        },
+                        {
+                            'key1': '通过',
+                            'key2': '1'
+                        },
+                        {
+                            'key1': '失败',
+                            'key2': '1'
+                        },
+                        {
+                            'key1': '错误',
+                            'key2': '0'
+                        },]
+                        this.tableData = JSON.parse(JSON.stringify(myTable)); 
+                        this.selectTableData = myTable;
+                        this.reportDetail = "测试配置: host: 10.9.242.41:9000  host: 10.9.242.41:9000 host: 10.9.242.41:9000 host: 10.9.242.41:9000 set_up: 124414  key1: 21124  key2: 13413";
+
+                        let hash = {};
+                        //遍历一个对象数组，并根据某个条件筛选,这里当名字为空的时候，也会push进去；
+                        this.executorList = myTable.reduce(function (arr, current) {
+                            hash[current.executor] ? '' : hash[current.executor] = true && arr.push(current);
+                            return arr
+                        }, []);
+
+
+
+                    },
+                    showToggle() {
+                        this.isShow = !this.isShow;
+                        return;
+                    },
+                    getRowKeys(row) {
+                        return row.id;
+                    },
+                    // 点击行任意位置展开
+                    cellClick(row, column, event) {
+                        if (event.cellIndex != 0) {
+                            this.$refs.multipleTable.toggleRowExpansion(row)
+                        }
+                    },
+                    // 展开（收起）全部
+                    expandAll() {
+                        if (this.isExpandAll) {//收起
+                            this.expands = [];
+                        } else {//展开全部
+                            for (let i = 0; i < this.tableData.length; i++) {
+                                this.expands.push(this.tableData[i].id);
+                            }
+                        }
+                        this.isExpandAll = !this.isExpandAll;
+                    },
+                    // 单元格样式回调
+                    cellStyle({ row, column, rowIndex, columnIndex }) {
+                        switch (columnIndex) {
+                            case 1:
+                                return 'font-weight:400;color:rgba(102,102,102,1);line-height:20px;font-size:15px';
+                            case 2:
+                                return 'font-weight:400;color:rgba(229,82,82,1);line-height:20px;font-size:15px';
+                            case 3:
+                                return 'font-weight:400;color:rgba(102,102,102,1);line-height:20px;font-size:15px';
+                            default:
+                                return;
+                        }
+                    },
+                   
+                    selectExecutor(val) {
+                        let arr = [];
+                        for (let i = 0; i < this.selectTableData.length; i++) {
+                            if (val === this.selectTableData[i].executor) {
+                                arr.push(this.selectTableData[i]);
+                            }
+                        }
+                        this.tableData = arr;
+                    },
+                    getAllExecutor() {
+                        this.init();
+                    },
+                    getAllResult() {
+                        this.formData.executor = '';
+                        this.init();
+
+                    },
+                    // 复合筛选
+                    getFail() {
+                        let arr = [];
+                        if (this.formData.executor === '') {
+                            for (let i = 0; i < this.selectTableData.length; i++) {
+                                if (this.selectTableData[i].result === 'Fail') {
+                                    arr.push(this.selectTableData[i])
+                                }
+                            }
+                        } else {
+                            for (let i = 0; i < this.selectTableData.length; i++) {
+                                if (this.selectTableData[i].result === 'Fail' && this.selectTableData[i].executor === this.formData.executor) {
+                                    arr.push(this.selectTableData[i])
+                                }
+                            }
+                        }
+                        this.tableData = arr;
+                        
+                    },
+                }
+            })
+
+        </script>
+</body>
+
+</html>

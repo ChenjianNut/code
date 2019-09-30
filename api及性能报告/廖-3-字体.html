@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>自动化测试报告</title>
+    <!-- #引入element+Vue -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="http://unpkg.com/vue/dist/vue.js"></script>
+    <script src="http://unpkg.com/element-ui@2.11.0/lib/index.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+    <style>
+        #app {
+            margin: 0 10%;
+        }
+
+        #appIn {
+            margin-left: 5%;
+        }
+
+        ._title {
+            width: 100%;
+            font-size: 23px;
+            font-family: SourceHanSansCN-Bold;
+            font-weight: bold;
+            color: rgba(51, 51, 51, 1);
+            line-height: 30px;
+            text-align: center;
+        }
+
+        #_div-top-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        #_div-top-bar .top-bar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            border: 1px solid rgba(217, 217, 217, 1);
+            margin: 10px 10px;
+            height: 95px;
+            border-radius: 8px;
+        }
+
+        .top-barIn {
+            margin: 15px;
+        }
+
+        #_div-top-bar .top-bar .top-bar-span {
+            font-family: DINAlternate;
+            font-weight: bold;
+            color: rgba(102, 102, 102, 1);
+        }
+
+        .span1 {
+            font-size: 28px;
+        }
+
+        .span2 {
+            font-size: 14px;
+        }
+
+        .span1In {
+            font-size: 18px;
+        }
+
+        .span2In {
+            font-size: 14px;
+        }
+
+        #_div-top-barIn .top-barIn {
+            display: inline-table;
+            margin: 2px 15px 2px 10px;
+        }
+
+        ._right {
+            display: block;
+            float: right;
+        }
+
+        button.link {
+            font-size: 1em;
+            color: blue;
+            background: none;
+            margin: 0;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            text-align: center;
+            width: 100%;
+            font-family: PingFangSC-Regular;
+            font-weight: 400;
+            color: rgba(67, 152, 138, 1);
+            line-height: 20px;
+        }
+
+        #appIn .linkIn {
+            font-size: 16px;
+            margin: 10px;
+            text-align: left;
+        }
+
+        .detail {
+            width: 35%;
+            margin-left: 40%;
+            margin-top: 1%;
+            text-align: left;
+            line-height: 27px;
+            font-size: 20px
+        }
+
+        .el-table__expand-icon>.el-icon {
+            display: none;
+        }
+
+        .span-form {
+            font-size: 20px;
+            font-family: SourceHanSansCN-Regular;
+            font-weight: 400;
+            color: rgba(102, 102, 102, 1);
+            line-height: 21px;
+        }
+
+        .mianBan {
+            font-size: 17px;
+            font-family: SourceHanSansCN;
+            font-weight: 400;
+        }
+
+        /* fix */
+        /* pre {
+            white-space: pre-wrap;
+            white-space: -moz-pre-wrap;
+            white-space: -pre-wrap;
+            white-space: -o-pre-wrap;
+            word-wrap: break-word;
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1 class="_title">自动化测试报告</h1>
+        <!-- 顶部报告详情***************************** -->
+        <div>
+            <button class="link" @click='showToggle'><span>报告详情</span></button>
+            <!-- fix,在detail里面就可以修改报告详情里面字体大小 -->
+            <div class="detail" v-show='isShow' v-html='reportDetail'>
+            </div>
+        </div>
+        <!-- 顶部小框框************************************* -->
+        <div id="_div-top-bar">
+            <div v-for='item in topList' class="top-bar">
+                <span class="top-bar-span span1"
+                    :style="{color:(item.key1=='错误'||item.key1=='失败')?'rgba(229,82,82,1)':item.key1=='通过'?'rgba(67,152,138,1)':''}">
+                    {{item.key2}}</span>
+                <span class="top-bar-span span2"
+                    :style="{color:(item.key1=='错误'||item.key1=='失败')?'rgba(229,82,82,1)':item.key1=='通过'?'rgba(67,152,138,1)':''}">
+                    {{item.key1}}</span>
+            </div>
+        </div>
+        <!-- 中部筛选内容*************************************************8 -->
+        <el-row>
+            <el-form label-width="150px" :inline="true" :model='formData'>
+                <el-form-item>
+                    <span class="span-form">任务名称：000</span>
+                </el-form-item>
+                <div class="_right">
+                    <el-form-item>
+                        <el-button @click='expandAll'>{{!isExpandAll?"展开全部":"收起全部"}}</el-button>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-select placeholder="请选择作者" clearable @clear='getAllExecutor' @change='selectExecutor'
+                            v-model="formData.id">
+                            <el-option v-for="item in executorList" :key="item.id" :label="item.executor"
+                                :value="item.executor">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button-group>
+                            <el-button @click='getAllResult'>全部</el-button>
+                            <el-button @click='getFail'>失败</el-button>
+                            <el-button @click='getError'>错误</el-button>
+                        </el-button-group>
+                    </el-form-item>
+                </div>
+            </el-form>
+        </el-row>
+        <!-- 折叠面板************************************************************************************-->
+        <el-collapse v-model="collopseArr" @change="handleChange">
+            <template v-for='(item,index) in tableData'>
+                <el-collapse-item :name='index'>
+                    <template slot="title">
+                        <el-col :span='18' class="mianBan">
+                            测试集名称：{{item.set_name}}
+                        </el-col>
+                        <el-col :span='6' class="mianBan">{{item.executor}}</el-col>
+
+                    </template>
+                    <!-- 内部的报告详情***************************************** -->
+                    <div id="appIn">
+
+                        <!-- 内部的小框框************************************* -->
+                        <div id="_div-top-barIn">
+                            <div class="top-barIn" v-for='props in item.topListIn'>
+                                <span class="top-bar-span span1In"
+                                    :style="{color:(props.key1In=='错误'||props.key1In=='失败')?'rgba(229,82,82,1)':props.key1In=='通过'?'rgba(67,152,138,1)':''}">
+                                    {{props.key1In}}:</span>
+                                <span class="top-bar-span span2In"
+                                    :style="{color:(props.key1In=='错误'||props.key1In=='失败')?'rgba(229,82,82,1)':props.key1In=='通过'?'rgba(67,152,138,1)':''}">
+                                    {{props.key2In}}</span>
+                            </div>
+                        </div>
+                        <!-- 展开后的表格***********************************8 -->
+                        <div>
+                            <el-table ref="multipleTable" :data="item.tableDataIn" style="width: 100%;"
+                                :header-cell-style="{background:'#eef1f6',fontFamily:'SourceHanSansCN-Medium',color:'rgba(102,102,102,1)'}"
+                                :cell-style="cellStyle" @cell-click="cellClick" id="table">
+                                <el-table-column type="expand">
+                                    <template slot-scope='scope'>
+                                        <el-form>
+                                            <span style="font-size: 20px">用例执行详情：</span>
+                                            <el-form-item v-html='scope.row.case_content_steps'></el-form-item>
+                                            <!-- fix -->
+                                        </el-form>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label='用例名称' prop='case_nameIn'></el-table-column>
+                                <el-table-column label='结果' width='240' prop="case_result_nameIn">
+                                    <template scope="scope">
+                                        <span
+                                            v-if="scope.row.case_result_nameIn=='Fail'||scope.row.case_result_nameIn=='Error'"
+                                            style="color:rgba(229,82,82,1)">{{ scope.row.case_result_nameIn }}</span>
+                                        <span v-else
+                                            style="color: rgb(67, 152, 138)">{{ scope.row.case_result_nameIn }}</span>
+                                    </template>
+                                </el-table-column>
+
+                                <el-table-column label='作者' width='200' prop='case_executorIn'></el-table-column>
+                            </el-table>
+                        </div>
+                </el-collapse-item>
+    </div>
+    </template>
+    </el-collapse>
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                isExpandAll: false,
+                isShow: false,
+                isShowIn: false,
+                expands: [],
+                collopseArr: [],
+                reportDetail: {},
+                formData: {
+                    executor: '',
+                    id: '',
+                    result: '',
+                },
+                tableData: [],
+                selectTableData: [],
+                executorList: [],
+                topList: [],
+                projectTitle: '',
+                expandsList: [],
+
+
+            },
+
+            mounted() {
+                this.init();
+            },
+
+            methods: {
+                init() {
+                    //调接口,给表格的内容赋值,fix,给用例执行时间加上颜色，给时间加上一个pre标签
+                    //fix,需要后端修改样式，在给出的HTML数据里面，加上相应的样式
+                    var myTable = [{ 'set_id': 1544, 'set_name': 'test_002', 'tableDataIn': [{ 'case_content_steps': '<span style=\'font-size:14px ;color:red\'>用例执行时间：</span>2019-08-20 19:26:11 <br>描述：<pre>执行异常：Traceback (most recent call last):\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1205, in run_case_entity\n    self.exec_single_case()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 882, in exec_http_step\n    self.setup()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 530, in setup\n    self.run_setup_dict(each, 1)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 259, in run_setup_dict\n    root_path = get_assist_path(repo_path, pre_name, project_name)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 132, in get_assist_path\n    root_path = os.path.join(home, "scripts", repo, pre, "setup_json")\n  File "/usr/local/bin/python3/lib/python3.7/posixpath.py", line 94, in join\n    genericpath._check_arg_types(\'join\', a, *p)\n  File "/usr/local/bin/python3/lib/python3.7/genericpath.py", line 149, in _check_arg_types\n    (funcname, s.__class__.__name__)) from None\nTypeError: join() argument must be str or bytes, not \'NoneType\'\n&lt;br&gt; <br></pre><span style=\'color:red\'>步骤1失败, 原因: <pre>执行异常：Traceback (most recent call last):\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1205, in run_case_entity\n    self.exec_single_case()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 882, in exec_http_step\n    self.setup()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 530, in setup\n    self.run_setup_dict(each, 1)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 259, in run_setup_dict\n    root_path = get_assist_path(repo_path, pre_name, project_name)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 132, in get_assist_path\n    root_path = os.path.join(home, "scripts", repo, pre, "setup_json")\n  File "/usr/local/bin/python3/lib/python3.7/posixpath.py", line 94, in join\n    genericpath._check_arg_types(\'join\', a, *p)\n  File "/usr/local/bin/python3/lib/python3.7/genericpath.py", line 149, in _check_arg_types\n    (funcname, s.__class__.__name__)) from None\nTypeError: join() argument must be str or bytes, not \'NoneType\'\n</pre> </span><br>\n                                <div class="step">\n                                    <div class="card-header card-header-flat" id="heading_0_1">\n                                        <h6 class="mb-0">\n                                            <a class="btn-link-primary btn-block text-left"\n                                            data-toggle="collapse" data-target="#collapse_0_1"\n                                            aria-expanded="false" aria-controls="collapse_0_1" title="点击展开">\n                                                步骤1: 无标题步骤\n                                            </a>\n                                        </h6>\n                                    </div>\n                                    <div id="collapse_0_1" class="collapse" aria-labelledby="heading_0_1">\n                                        <div class="card-body">\n                                            <span style=\'color:red\'>失败原因: <br> &emsp;&emsp;执行异常：Traceback (most recent call last):\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1205, in run_case_entity\n    self.exec_single_case()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 882, in exec_http_step\n    self.setup()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 530, in setup\n    self.run_setup_dict(each, 1)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 259, in run_setup_dict\n    root_path = get_assist_path(repo_path, pre_name, project_name)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 132, in get_assist_path\n    root_path = os.path.join(home, "scripts", repo, pre, "setup_json")\n  File "/usr/local/bin/python3/lib/python3.7/posixpath.py", line 94, in join\n    genericpath._check_arg_types(\'join\', a, *p)\n  File "/usr/local/bin/python3/lib/python3.7/genericpath.py", line 149, in _check_arg_types\n    (funcname, s.__class__.__name__)) from None\nTypeError: join() argument must be str or bytes, not \'NoneType\'\n </span><br><br><br>&emsp;&emsp;详细用例: <br> &emsp;&emsp;{\'1\': {\'title\': \'获取人像库列表信息\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}, {\'action\': \'get_userId\', \'module\': \'senseface\'}, {\'action\': \'get_librarySerial\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.targetLibraries\')}}?page=1&number=30&orderBy=update_time", \'teardown\': [], \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}, \'key\': {\'get_tarserial\': \'list.0.serial\', \'get_tarname\': \'list.0.name\'}, \'response\': {\'status_code\': {\'=\': 200}, \'list\': {\'type\': \'list\'}}, \'method\': \'GET\'}, \'2\': {\'body\': {\'body\': {\'end\': 1, \'libName\': \'{{key.get_tarname}}\', \'libSerial\': \'{{key.get_tarserial}}\', \'serial\': \'{{key.get_tarserial}}\', \'start\': 1, \'type\': 1, \'websocketId\': \'{{image.get_uuid1()}}\'}}, \'title\': \'生成导出人像数据唯一的值\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}, {\'action\': \'get_platforms\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.targetLibraries_export\')}}/{{key.get_tarserial}}", \'response\': {\'status_code\': {\'=\': 200}, \'ret\': {\'type\': \'str\'}}, \'teardown\': [], \'key\': {\'ret\': \'ret\'}, \'method\': \'POST\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'4\': {\'title\': \'获取导出检索数据\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.targetLibraries_export\')}}", \'key\': {\'get_targetwebsocketId\': \'list.0.websocketId\', \'get_targetserial\': \'list.0.serial\'}, \'response\': {\'status_code\': {\'=\': 200}, \'list\': {\'type\': \'list\'}}, \'teardown\': [], \'method\': \'GET\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'5\': {\'title\': \'检索结果导出\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.targetLibraries_export\')}}/{{key.get_targetserial}}", \'response\': {\'status_code\': {\'=\': 200}}, \'teardown\': [], \'method\': \'GET\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}} <br>\n                                        </div>\n                                    </div>\n                                </div>\n            <br>', 'case_result_nameIn': 'Error', 'case_executorIn': 'Qiu Juhang', 'case_nameIn': '人像库人像导出' }, { 'case_content_steps': '用例执行时间：2019-08-20 19:26:11 <br>描述：<pre>执行异常：Traceback (most recent call last):\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1205, in run_case_entity\n    self.exec_single_case()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 882, in exec_http_step\n    self.setup()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 530, in setup\n    self.run_setup_dict(each, 1)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 259, in run_setup_dict\n    root_path = get_assist_path(repo_path, pre_name, project_name)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 132, in get_assist_path\n    root_path = os.path.join(home, "scripts", repo, pre, "setup_json")\n  File "/usr/local/bin/python3/lib/python3.7/posixpath.py", line 94, in join\n    genericpath._check_arg_types(\'join\', a, *p)\n  File "/usr/local/bin/python3/lib/python3.7/genericpath.py", line 149, in _check_arg_types\n    (funcname, s.__class__.__name__)) from None\nTypeError: join() argument must be str or bytes, not \'NoneType\'\n&lt;br&gt; <br></pre><span style=\'color:red\'>步骤1失败, 原因: <pre>执行异常：Traceback (most recent call last):\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1205, in run_case_entity\n    self.exec_single_case()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 882, in exec_http_step\n    self.setup()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 530, in setup\n    self.run_setup_dict(each, 1)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 259, in run_setup_dict\n    root_path = get_assist_path(repo_path, pre_name, project_name)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 132, in get_assist_path\n    root_path = os.path.join(home, "scripts", repo, pre, "setup_json")\n  File "/usr/local/bin/python3/lib/python3.7/posixpath.py", line 94, in join\n    genericpath._check_arg_types(\'join\', a, *p)\n  File "/usr/local/bin/python3/lib/python3.7/genericpath.py", line 149, in _check_arg_types\n    (funcname, s.__class__.__name__)) from None\nTypeError: join() argument must be str or bytes, not \'NoneType\'\n</pre> </span><br>\n                                <div class="step">\n                                    <div class="card-header card-header-flat" id="heading_1_1">\n                                        <h6 class="mb-0">\n                                            <a class="btn-link-primary btn-block text-left"\n                                            data-toggle="collapse" data-target="#collapse_1_1"\n                                            aria-expanded="false" aria-controls="collapse_1_1" title="点击展开">\n                                                步骤1: 无标题步骤\n                                            </a>\n                                        </h6>\n                                    </div>\n                                    <div id="collapse_1_1" class="collapse" aria-labelledby="heading_1_1">\n                                        <div class="card-body">\n                                            <span style=\'color:red\'>失败原因: <br> &emsp;&emsp;执行异常：Traceback (most recent call last):\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1341, in run\n    run.run_case_entity()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1205, in run_case_entity\n    self.exec_single_case()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 1124, in exec_single_case\n    self.exec_http_step()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 882, in exec_http_step\n    self.setup()\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 530, in setup\n    self.run_setup_dict(each, 1)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 259, in run_setup_dict\n    root_path = get_assist_path(repo_path, pre_name, project_name)\n  File "/platform/backend-api/integration/auto_executor/executor/function.py", line 132, in get_assist_path\n    root_path = os.path.join(home, "scripts", repo, pre, "setup_json")\n  File "/usr/local/bin/python3/lib/python3.7/posixpath.py", line 94, in join\n    genericpath._check_arg_types(\'join\', a, *p)\n  File "/usr/local/bin/python3/lib/python3.7/genericpath.py", line 149, in _check_arg_types\n    (funcname, s.__class__.__name__)) from None\nTypeError: join() argument must be str or bytes, not \'NoneType\'\n </span><br><br><br>&emsp;&emsp;详细用例: <br> &emsp;&emsp;{\'1\': {\'title\': \'获取视频源code\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.videoResources_qwrueryByUser\')}}?random=0.021232903485787658", \'method\': \'GET\', \'teardown\': [], \'key\': [\'code\'], \'response\': {\'status_code\': {\'=\': 200}}, \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'2\': {\'body\': {\'body\': {\'startTime\': \'2018-09-10 00:00:00\', \'endTime\': \'2019-10-10 23:59:59\', \'timeType\': 0, \'videoSerials\': \'{{key.code}}:list\', \'number\': 50, \'page\': 1}}, \'title\': \'路人库检索选中视频源\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_captures\')}}/count", \'response\': {\'status_code\': {\'=\': 200}, \'type\': \'dict\'}, \'teardown\': [], \'key\': {\'Get_Reserial\': \'serial\', \'Get_resourceTypeId\': \'list.0.resourceTypeId\'}, \'method\': \'POST\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'3\': {\'title\': \'获取视频源ID和视频源Serials\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_last_condition\')}}", \'method\': \'GET\', \'teardown\': [], \'key\': {\'Get_SourceSerials\': \'selectedSourceSerials\', \'Get_SourceIds\': \'selectedSourceIds\'}, \'response\': {\'status_code\': {\'=\': 200}}, \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'4\': {\'files\': {\'files\': "{{image.getcwd(\'material/SenseFace/API/11.jpg\')}}", \'name\': \'file\'}, \'body\': {\'librarySerial\': \'{{key.Get_Serial}}\'}, \'title\': \'上传人像接口\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_pic_upload\')}}", \'method\': \'POST\', \'teardown\': [], \'key\': {\'return\': \'\'}, \'response\': {\'status_code\': {\'=\': 200}}, \'headers\': {\'accesssToken\': \'{{key.accesssToken}}\'}}, \'5\': {\'body\': {\'body\': {\'startTime\': \'2018-09-10 00:00:00\', \'endTime\': \'2019-10-10 23:59:59\', \'imageInfo\': \'{{key.return}}:dict\', \'videoSerials\': \'{{key.Get_SourceSerials}}:list\', \'videoSourceIds\': \'{{key.Get_SourceIds}}:list\'}}, \'title\': \'路人库检索\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_capture_retrieval\')}}", \'response\': {\'status_code\': {\'=\': 200}, \'list\': {\'type\': \'list\'}}, \'teardown\': [], \'key\': {\'Get_Reserial\': \'serial\', \'Get_resourceTypeId\': \'list.0.resourceTypeId\', \'Get_ImageSerial\': \'list.0.imageSerial\'}, \'method\': \'POST\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'6\': {\'body\': {\'body\': {\'number\': 50, \'page\': 1, \'serial\': \'{{key.Get_Reserial}}\', \'serialsAndTypes\': [{\'serial\': \'{{key.Get_SourceSerials}}:list\', \'type\': \'{{key.Get_resourceTypeId}}:int\'}]}}, \'title\': \'比中结果收藏\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_favourites\')}}", \'response\': {\'status_code\': {\'=\': 200}, \'status\': {\'=\': \'successs\'}}, \'teardown\': [], \'key\': {\'ret\': \'ret\'}, \'method\': \'POST\', \'wait\': 10000, \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'7\': {\'title\': \'收藏记录\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_favourites\')}}", \'response\': {\'status_code\': {\'=\': 200}, \'list\': {\'type\': \'list\'}}, \'teardown\': [], \'method\': \'GET\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'8\': {\'body\': {\'body\': {\'number\': 50, \'page\': 1, \'serial\': \'{{key.Get_Reserial}}\', \'serialsAndTypes\': []}}, \'title\': \'取消比中结果收藏\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_favourites\')}}", \'response\': {\'status_code\': {\'=\': 200}, \'status\': {\'=\': \'successs\'}}, \'teardown\': [], \'key\': {\'ret\': \'ret\'}, \'method\': \'POST\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'9\': {\'title\': \'检索历史记录\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_history_v32\')}}", \'response\': {\'status_code\': {\'=\': 200}, \'list\': {\'type\': \'list\'}}, \'teardown\': [], \'method\': \'GET\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'10\': {\'title\': \'导出路人库唯一标识值获取\', \'body\': {\'body\': {\'imageSerials\': [\'{{key.Get_ImageSerial}}\'], \'serial\': \'{{key.Get_Reserial}}\', \'type\': 1, \'websocketId\': \'{{image.get_uuid1()}}\'}}, \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.search_export\')}}", \'key\': {\'get_str\': \'ret\'}, \'response\': {\'status_code\': {\'=\': 200}, \'ret\': {\'type\': \'str\'}}, \'teardown\': [], \'method\': \'POST\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'11\': {\'title\': \'获取导出检索数据\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.targetLibraries_export\')}}", \'key\': {\'get_targetwebsocketId\': \'list.0.websocketId\', \'get_targetserial\': \'list.0.serial\'}, \'response\': {\'status_code\': {\'=\': 200}, \'list\': {\'type\': \'list\'}}, \'teardown\': [], \'method\': \'GET\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}, \'12\': {\'title\': \'检索结果导出\', \'url\': "{{common.url(\'senseface_server\')}}", \'setup\': [{\'action\': \'user_login\', \'module\': \'senseface\'}], \'rest\': "{{common.server_url(\'{{key.api_version}}_uri.targetLibraries_export\')}}/{{key.get_targetserial}}", \'response\': {\'status_code\': {\'=\': 200}}, \'teardown\': [], \'method\': \'GET\', \'headers\': {\'Content-Type\': \'application/json\', \'accesssToken\': \'{{key.accesssToken}}\'}}} <br>\n                                        </div>\n                                    </div>\n                                </div>\n            <br>', 'case_result_nameIn': 'Error', 'case_executorIn': 'Qiu Juhang', 'case_nameIn': '路人库检索结果导出' }], 'executor': 'Qu Chao', 'topListIn': [{ 'key1In': '通过率', 'key2In': '0.00%' }, { 'key1In': '总数', 'key2In': '2' }, { 'key1In': '通过', 'key2In': '0' }, { 'key1In': '失败', 'key2In': '0' }, { 'key1In': '错误', 'key2In': '2' }] }];
+                    this.topList = [{
+                        'key1': '通过率',
+                        'key2': '0.00%'
+                    },
+                    {
+                        'key1': '总数',
+                        'key2': '2'
+                    },
+                    {
+                        'key1': '通过',
+                        'key2': '0'
+                    },
+                    {
+                        'key1': '失败',
+                        'key2': '0'
+                    },
+                    {
+                        'key1': '错误',
+                        'key2': '2'
+                    },]
+                    // this.tableData = JSON.parse(JSON.stringify(myTable));
+                    // this.selectTableData = myTable;
+                    this.tableData = myTable;
+                    this.selectTableData = JSON.parse(JSON.stringify(myTable));
+                    this.reportDetail = {
+                        '开始时间': '2019-08-23 20:04:02', '持续时长': '59 seconds', "结束时间": '2019-08-23 20:05:01'
+                    }
+                    // this.reportDetail=" <br>  <br>  <br> 配置名称：测试专用1 <br> 默认配置参数信息：{'host': '10.9.242.9:10219', 'password': 'admin2018', 'user': 'admin', 'viper_host': '10.9.244.33:30080', 'set_id': 1546, 'pre_name': None, 'repo_name': 'sats'} <br> 自定义配置参数信息：{} <br>";
+                    let hash = {};
+                    //遍历一个对象数组，并根据某个条件筛选
+                    this.executorList = myTable.reduce(function (arr, current) {
+                        hash[current.executor] ? '' : hash[current.executor] = true && arr.push(current);
+                        return arr
+                    }, []);
+                    myTable.map((item,index)=>{
+                        this.expandsList.push(index);
+                    })
+
+                    console.log('intt里面的展开数组（前）：',this.expandsList);
+
+                },
+                // over
+                showToggle() {
+                    this.isShow = !this.isShow;
+                    return;
+                },
+                // over
+                showToggleIn() {
+                    this.isShowIn = !this.isShowIn;
+                    return;
+                },
+                // getRowKeys(row) {
+                //     console.log('row', row);
+                //     return row.case_content_steps;
+                // },
+                // 点击行任意位置展开
+                cellClick(row, column, event) {
+                    if (event.cellIndex != 0) {
+                        this.expandsList.map(item => {
+                            this.$refs.multipleTable[item].toggleRowExpansion(row)
+                        })
+                    }
+                },
+
+                // collopse的展开全部****************************
+                expandAll() {
+                    if (this.isExpandAll) {//收起
+                        this.collopseArr = [];
+                    } else { //展开
+                        for (let i = 0; i < this.tableData.length; i++) {
+                            this.collopseArr.push(i);
+                        }
+                    }
+                    this.isExpandAll = !this.isExpandAll;
+                   
+                },
+                // 单元格样式回调rgba(67,152,138,1)
+                cellStyle({ row, column, rowIndex, columnIndex }) {
+                    switch (columnIndex) {
+                        case 1:
+                            return 'font-family:SourceHanSansCN;font-weight:400;color:rgba(102,102,102,1);line-height:20px;font-size:15px';
+                        case 2:
+                            return 'font-family:SourceHanSansCN;font-weight:400;color:rgba(229,82,82,1);line-height:20px;font-size:15px';
+                        case 3:
+                            return 'font-family:SourceHanSansCN;font-weight:400;color:rgba(102,102,102,1);line-height:20px;font-size:15px';
+                        default:
+                            return;
+                    }
+                },
+                // 筛选
+                selectExecutor(val) {
+                    let arr = [];
+                    // fix 去掉这个fix
+                    // this.init();
+                    for (let i = 0; i < this.selectTableData.length; i++) {
+                        if (val === this.selectTableData[i].executor) {
+                            arr.push(this.selectTableData[i]);
+                        }
+                    }
+                    console.log('筛选里面的展开数组（前）：',this.expandsList);
+                    this.tableData = arr;
+                    // fix
+                    // this.expandsList=[];
+                    // arr.map((item,index)=>{
+                    //     this.expandsList.push(index);
+                    // })
+                    console.log('筛选里面的展开数组（后）：',this.expandsList);
+                   
+
+                },
+                getAllExecutor() {
+                    this.init();
+                },
+                getAllResult() {
+                    this.init();
+                },
+                // 筛选失败的
+                getFail() {
+                    for (let i = 0; i < this.selectTableData.length; i++) {//变历外层数组
+                        var arr = [];
+                        for (var key = 0; key < this.selectTableData[i].tableDataIn.length; key++) {//遍历内层数组
+                            if (this.selectTableData[i].tableDataIn[key].case_result_nameIn === 'Fail') {
+                                arr.push(this.selectTableData[i].tableDataIn[key]);
+                            }
+                        }
+                        this.tableData[i].tableDataIn = arr;
+                    }
+                },
+                getError() {
+                    for (let i = 0; i < this.selectTableData.length; i++) {//变历外层数组
+                        var arr = [];
+                        for (var key = 0; key < this.selectTableData[i].tableDataIn.length; key++) {//遍历内层数组
+                            if (this.selectTableData[i].tableDataIn[key].case_result_nameIn === 'Error') {
+                                arr.push(this.selectTableData[i].tableDataIn[key]);
+                            }
+                        }
+                        this.tableData[i].tableDataIn = arr;
+                    }
+                },
+                handleChange(val) {
+                    this.projectTitle = '';
+                    for (let i = 0; i < this.tableData.length; i++) {
+                        for (let j = 0; j < val.length; j++) {
+                            this.projectTitle = this.tableData[val[j]].project
+                        }
+                    }
+                    return;
+                },
+
+            }
+        })
+
+    </script>
+</body>
+
+</html>
