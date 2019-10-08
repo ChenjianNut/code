@@ -1,0 +1,65 @@
+#calculator
+{
+    width:200px;
+    height:245px;
+    padding:10px;
+    border:1px solid #e5e5e5;
+    background:#f8f8f8;
+    /* 处理圆角效果 */
+    /* -moz-,  -webkit-, -o-都是代表浏览器的的相应前缀 */
+    /* -moz-border-radius:3px;
+    -webkit-border-radius:3px; */
+    border-radius:3px;
+    /* 设置阴影透明度 */
+    box-shadow:0px 0px 10px #f2f2f2;
+    /* -moz-box-shadow:0px 0px 10px #f2f2f2;
+    -webkit-box-shadow:0px 0px 10px #f2f2f2; */
+    margin:40px auto 0 auto;
+}
+#calculator #input-box
+{
+    margin:0;
+    width:187px;
+    padding:9px 5px;
+    height:14px;
+    border:1px solid #e5e5e5;
+    border-radius:3px;
+    background:#FFF;
+    text-align:right;
+    line-height:14px;
+    font-size:12px;
+    font-family:Verdana,Geneva, sans-serif;
+    color:#666;
+    outline:none; 
+    /* 转换文本里面的字体，下面是变为大写 */
+    text-transform:uppercase;
+}
+#calculator #btn-list
+{
+    width:200px;
+    overflow:hidden;
+}
+#calculator #btn-list .btn-radius
+{
+    border-radius:2px;
+    border:1px solid #e5e5e5;
+    /* 过滤属性 */
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#f7f7f7,endColorstr=#ebebeb,grandientType=1);
+    line-height:29px;
+    text-align:center;
+    text-shadow:0px 1px 1px #FFF;
+    font-weight:bold;
+    font-family:Verdana, Geneva, sans-serif;
+    color:#666;float:left;
+    margin-left:11px;
+    margin-top:11px;
+    font-size:12px;
+    cursor:pointer;
+}
+#calculator #btn-list .btn-radius:active{background:#ffffff;}
+#calculator #btn-list .clear-marginleft{margin-left:0;}
+#calculator #btn-list .font-14{font-size:14px;}
+#calculator #btn-list .color-red{color:#ff5050}
+#calculator #btn-list .color-blue{color:#00b4ff}
+#calculator #btn-list .btn-30{width:29px;height:29px;}
+#calculator #btn-list .btn-70{width:70px;height:29px;}
