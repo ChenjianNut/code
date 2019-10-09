@@ -1,0 +1,39 @@
+{
+  "classmate": [
+    {
+      "id": 1,
+      "name": "mm",
+      "gender": "女",
+      "phoneNumber": "13345445544",
+      "birthday": "2008-1-2"
+    },
+    {
+      "id": 2,
+      "name": "nn",
+      "gender": "女",
+      "phoneNumber": "144444423454",
+      "birthday": "2009-1-2"
+    },
+    {
+      "name": "kk",
+      "gender": "女",
+      "phoneNumber": "14444444444",
+      "birthday": "2019-10-01",
+      "id": 4
+    },
+    {
+      "name": "gg",
+      "gender": "男",
+      "phoneNumber": "13444556554",
+      "birthday": "2018-10-01",
+      "id": 5
+    },
+    {
+      "name": "oo",
+      "gender": "男",
+      "phoneNumber": "13434343434",
+      "birthday": "2017-10-02",
+      "id": 6
+    }
+  ]
+}

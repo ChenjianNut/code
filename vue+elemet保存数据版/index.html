@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>组件界面2</title>
+    <!-- #引入element+Vue -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script> 
+    <!-- 引入axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+</head>
+<body>
+    <div id="app">
+       <!-- <h1>同学录</h1> -->
+       <div class="head">
+           <el-row :gutter='20'>
+               <el-col :span='6'>
+                   <el-input v-model='userInfo.name' placeholder="姓名"></el-input>
+               </el-col>
+               <el-col :span='6'>
+                    <el-input v-model='userInfo.gender' placeholder="性别"></el-input>
+                </el-col>
+                <el-col :span='6'>
+                    <el-input v-model='userInfo.phoneNumber' placeholder="手机"></el-input>
+                </el-col>
+                <el-col :span='6'>
+                    <el-date-picker v-model='userInfo.birthday' type='date'
+                        format='yyyy年MM月dd日' value-format='yyyy-MM-dd' placeholder="选择日期"> 
+                    </el-date-picker>
+                </el-col>
+           </el-row>
+       </div>
+       <el-button type='primary' class="add-btn" @click='addUser'>添加</el-button>
+       <div class="body">
+          <template>
+             <el-table :data='tableData' style="width:100%">
+                <el-table-column prop="data" label='序号' width='180'>
+                    <template slot-scope="prop">
+                       {{prop.$index+1}}
+                    </template> 
+                </el-table-column>
+                <el-table-column prop="name" label='姓名' width='180'></el-table-column>
+                <el-table-column prop="gender" label='性别' width='180'></el-table-column>
+                <el-table-column prop="phoneNumber" label='号码' width='180'></el-table-column>
+                <el-table-column prop="birthday" label='生日' width='180' ></el-table-column>
+                <el-table-column>
+                    <template slot-scope="prop">
+                        <el-button type="primary" @click='editUser(prop.row)'  icon="el-icon-edit" circle></el-button>
+                        <el-button type="danger" @click='delUser(prop.row,prop.$index)' icon="el-icon-delete" circle></el-button>
+                    </template>
+                </el-table-column>
+             </el-table>
+          </template>  
+       </div>
+
+       <el-dialog title="编辑用户信息" :visible.sync='dialogVisible'
+            widht='30%' :before-close='handleClose'>
+            <div>
+                <el-form ref="form" :model='editor' label-position="left" label-width='80px'>
+                    <el-form-item label='姓名'>
+                        <el-input v-model='editor.name'></el-input>
+                    </el-form-item>
+                    <el-form-item label='性别'>
+                        <el-input v-model='editor.gender'></el-input>
+                    </el-form-item>
+                    <el-form-item label='电话号码'>
+                        <el-input v-model='editor.phoneNumber'></el-input>
+                    </el-form-item>
+                    <el-form-item label='生日'>
+                        <el-date-picker v-model='editor.birthday' type='date' style="width: 100%"
+                            format='yyyy年MM月dd日' value-format='yyyy-MM-dd' placeholder="选择日期"> 
+                        </el-date-picker>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click='dialogVisible=false'>取消</el-button>
+                <el-button type='primary' @click='confirm'>确定</el-button>
+            </span>
+       </el-dialog>
+       
+    </div>
+    <!-- 写成这种分离式的形式，注意文件引入的位置 -->
+    <script src="http://unpkg.com/vue/dist/vue.js"></script>
+    <script src="http://unpkg.com/element-ui@2.11.0/lib/index.js"></script>
+    <script src="./js/index.js "></script>
+    <link rel="stylesheet" href="./style/index.css">
+</body>
+</html> 
